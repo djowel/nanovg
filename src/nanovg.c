@@ -2527,28 +2527,25 @@ int nvgTextBreakLines(NVGcontext* ctx, const char* string, const char* end, floa
 			rowMinX = rowMaxX = 0;
 		} else {
 			if (rowStart == NULL) {
-				// Skip white space until the beginning of the line
-				if (type == NVG_CHAR) {
-					// The current char is the row so far
-					rowStartX = iter.x;
-					rowStart = iter.str;
-					rowEnd = iter.next;
-					rowWidth = iter.nextx - rowStartX; // q.x1 - rowStartX;
-					rowMinX = q.x0 - rowStartX;
-					rowMaxX = q.x1 - rowStartX;
-					wordStart = iter.str;
-					wordStartX = iter.x;
-					wordMinX = q.x0 - rowStartX;
-					// Set null break point
-					breakEnd = rowStart;
-					breakWidth = 0.0;
-					breakMaxX = 0.0;
-				}
+				// The current char is the row so far
+				rowStartX = iter.x;
+				rowStart = iter.str;
+				rowEnd = iter.next;
+				rowWidth = iter.nextx - rowStartX; // q.x1 - rowStartX;
+				rowMinX = q.x0 - rowStartX;
+				rowMaxX = q.x1 - rowStartX;
+				wordStart = iter.str;
+				wordStartX = iter.x;
+				wordMinX = q.x0 - rowStartX;
+				// Set null break point
+				breakEnd = rowStart;
+				breakWidth = 0.0;
+				breakMaxX = 0.0;
 			} else {
 				float nextWidth = iter.nextx - rowStartX;
 
-				// track last non-white space character
-				if (type == NVG_CHAR) {
+				// track last character
+				if (type == NVG_CHAR || type == NVG_SPACE) {
 					rowEnd = iter.next;
 					rowWidth = iter.nextx - rowStartX;
 					rowMaxX = q.x1 - rowStartX;
