@@ -706,6 +706,65 @@ void nvgFillPaint(NVGcontext* ctx, NVGpaint paint)
 	nvgTransformMultiply(state->fill.xform, state->xform);
 }
 
+static float nvg__distPtSeg(float x, float y, float px, float py, float qx, float qy);
+
+int nvgOnStroke(NVGcontext* ctx, float mx, float my, float tol)
+{
+    const NVGpath* path;
+    int i, j;
+    float ax, ay;
+    float bx, by;
+
+    for (i = 0; i < ctx->cache->npaths; i++) {
+        path = &ctx->cache->paths[i];
+
+        if (path->nstroke) {
+            for (i = 0, j = path->nstroke - 1; i < path->nstroke; j = i++) {
+                ax = path->stroke[i].x;
+                ay = path->stroke[i].y;
+                bx = path->stroke[j].x;
+                by = path->stroke[j].y;
+
+                if (nvg__distPtSeg(mx, my, ax, ay, bx, by) < tol*tol) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+int nvgOnFill(NVGcontext* ctx, float mx, float my)
+{
+    const NVGpath* path;
+    int i, j, c = 0;
+    float ax, ay;
+    float bx, by;
+    float flag;
+
+    for (i = 0; i < ctx->cache->npaths; i++) {
+        path = &ctx->cache->paths[i];
+
+        if (path->nfill) {
+            for (i = 0, j = path->nfill - 1; i < path->nfill; j = i++) {
+                ax = path->fill[i].x;
+                ay = path->fill[i].y;
+                bx = path->fill[j].x;
+                by = path->fill[j].y;
+
+                flag = (ay > my) != (by > my);
+
+                if (flag) {
+                    if ( (mx < (bx - ax) * (my - ay) / (by - ay) + ax) )
+                        c = !c;
+                }
+            }
+            return c;
+        }
+    }
+    return 0;
+}
+
 int nvgCreateImage(NVGcontext* ctx, const char* filename, int imageFlags)
 {
 	int w, h, n, image;
